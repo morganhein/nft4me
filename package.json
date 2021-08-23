@@ -1,0 +1,35 @@
+{
+  "name": "nft4me",
+  "version": "0.1.0",
+  "description": "Bot for buying/selling NFT's on OpenSea",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "chai": "^4.3.4",
+    "eslint": "^7.32.0",
+    "nyc": "^15.1.0",
+    "opensea-js": "^1.1.13",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "mocha": "^9.1.0"
+  },
+  "scripts": {
+    "test": "ts-mocha tests/**/*.test.ts",
+    "build": "tsc",
+    "coverage": "nyc npm test",
+    "lint": "eslint \"**/*.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/morganhein/nft4me.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/morganhein/nft4me/issues"
+  },
+  "homepage": "https://github.com/morganhein/nft4me#readme"
+}
