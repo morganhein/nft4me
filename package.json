@@ -1,41 +1,21 @@
 {
-  "name": "nft4me",
+  "name": "nft4me2",
   "version": "0.1.0",
-  "description": "Bot for buying/selling NFT's on OpenSea",
   "main": "dist/index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "dependencies": {
-    "chai": "^4.3.4",
-    "eslint": "^7.32.0",
-    "nyc": "^15.1.0",
-    "opensea-js": "^1.1.13",
-    "typescript": "^4.3.5"
-  },
-  "devDependencies": {
-    "@types/chai": "^4.2.21",
-    "@types/jest": "^27.0.1",
-    "@types/mocha": "^9.0.0",
-    "jest": "^27.0.6",
-    "mocha": "^9.1.0",
-    "ts-jest": "^27.0.5",
-    "web3": "^1.5.2"
-  },
+  "license": "MIT",
   "scripts": {
     "test": "jest",
     "build": "tsc",
     "coverage": "nyc npm test",
     "lint": "eslint \"**/*.ts\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/morganhein/nft4me.git"
+  "dependencies": {
+    "opensea-js": "^1.1.13",
+    "web3": "^1.5.2"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/morganhein/nft4me/issues"
-  },
-  "homepage": "https://github.com/morganhein/nft4me#readme"
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
+    "eslint": "^7.32.0"
+  }
 }
