@@ -1,24 +1,21 @@
+import * as dotenv from "dotenv";
 import { Nftbot } from "./nftbot";
 import { HTTPRetriever, IOpenSeaSearch } from "./searcher";
 import { Web3Market, IBlockMarket } from "./market";
 
+dotenv.config();
+const SourceWallet = process.env.SOURCE_WALLET as string;
+const GasLimit = process.env.GAS_LIMIT as string;
+const EthLimit = process.env.ETH_LIMIT as string;
+const MarketHost = process.env.MARKET_HOST as string;
+const OpenSeaHTTPAPI = process.env.OPEN_SEA_API as string;
+
 function main() {
-  //TODO: need to grab/parse invocation arguments
   const collection: string = "weape24";
-  const gasLimit: number = 3;
-  const weiLimit: number = 1;
-  const ethLimit: number = 0.02;
-  let searcher: IOpenSeaSearch = new HTTPRetriever(
-    "https://api.opensea.io/api/v1/events"
-  );
-  let market: IBlockMarket = new Web3Market(
-    "https://mainnet.infura.io",
-    "TODO: Add wallet"
-  );
-  let nftBot = new Nftbot(searcher, market, collection, ethLimit, gasLimit);
+  let searcher: IOpenSeaSearch = new HTTPRetriever(OpenSeaHTTPAPI);
+  let market: IBlockMarket = new Web3Market(MarketHost, SourceWallet);
+  let nftBot = new Nftbot(searcher, market, collection, +EthLimit, +GasLimit);
   nftBot.start();
 }
 
 main();
-
-// 311,309,427,143
