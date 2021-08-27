@@ -20,11 +20,13 @@
     "web3": "^1.5.2"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.1",
     "@types/superagent": "^4.1.12",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
     "eslint": "^7.32.0",
     "jest": "^27.0.6",
-    "prettier": "^2.3.2"
+    "prettier": "^2.3.2",
+    "ts-jest": "^27.0.5"
   }
 }

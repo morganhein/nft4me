@@ -119,7 +119,7 @@ export class FileRetriever implements IOpenSeaSearch {
   ): Promise<SearchResults> {
     return new Promise<SearchResults>((resolve) => {
       const resultString: string = fs.readFileSync(
-        "../tests/example.json",
+        "./tests/example.json",
         "utf8"
       );
       const resultJson = JSON.parse(resultString);

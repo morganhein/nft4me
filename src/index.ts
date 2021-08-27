@@ -11,16 +11,14 @@ function main() {
   let searcher: IOpenSeaSearch = new HTTPRetriever(
     "https://api.opensea.io/api/v1/events"
   );
-  let market: IBlockMarket = new Web3Market("https://mainnet.infura.io");
-  let nftBot = new Nftbot(
-    searcher,
-    market,
-    collection,
-    ethLimit,
-    gasLimit,
-    weiLimit
+  let market: IBlockMarket = new Web3Market(
+    "https://mainnet.infura.io",
+    "TODO: Add wallet"
   );
+  let nftBot = new Nftbot(searcher, market, collection, ethLimit, gasLimit);
   nftBot.start();
 }
 
 main();
+
+// 311,309,427,143
