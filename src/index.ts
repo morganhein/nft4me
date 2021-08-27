@@ -2,6 +2,7 @@ import { Config } from "./config";
 import { Nftbot } from "./nftbot";
 import { HTTPRetriever, IOpenSeaSearch } from "./searcher";
 import { Web3Market, IBlockMarket } from "./market";
+import { logger } from "./logging";
 
 async function main() {
   let c = Config("live");
@@ -18,5 +19,5 @@ async function main() {
 }
 
 main().then(() => {
-  console.log("finished running");
+  logger.info("finished running");
 });

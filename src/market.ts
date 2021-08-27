@@ -2,6 +2,7 @@ import { OpenSeaPort, Network } from "opensea-js";
 import Web3 from "web3";
 import { provider } from "web3-core";
 import { OpenSeaAsset, Order, OrderSide } from "opensea-js/lib/types";
+import { logger } from "./logging";
 
 //operations that are performed against the OpenSea SDK on the Ethereum blockchain, not the
 //OpenSea API over http
@@ -49,7 +50,7 @@ export class Web3Market implements IBlockMarket {
         });
         resolve(buyOrder);
       } catch (error) {
-        console.log("error buying asset", error);
+        logger.error("error buying asset", error);
         reject(error);
       }
     });
@@ -75,7 +76,7 @@ export class Web3Market implements IBlockMarket {
     try {
       return await this.w3.eth.getGasPrice();
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       //return -1 here so we don't accidentally buy tons of shit when the gas price is above 200 but this query failed
       return "-1";
     }
@@ -94,7 +95,7 @@ export class Web3Market implements IBlockMarket {
         }
         resolve(orders.orders);
       } catch (error) {
-        console.log("error retrieving orders", error);
+        logger.error("error retrieving orders", error);
         reject(error);
       }
     });

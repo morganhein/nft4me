@@ -1,6 +1,7 @@
 import { IOpenSeaSearch, SearchResults, MarketEvent } from "./searcher";
 import { IBlockMarket } from "./market";
 import { OpenSeaAsset, Order } from "opensea-js/lib/types";
+import { logger } from "./logging";
 
 /*
  * Start watching the listings based on collection,
@@ -80,10 +81,10 @@ export class Nftbot {
         .buyAsset(event.asset.token_id, event.asset.asset_contract.address, 0)
         .then((response) => {
           //todo: better logging, maybe send to discord or something
-          console.log("item bought successfully", response.asset?.name);
+          logger.info("item bought successfully", response.asset?.name);
         })
         .catch((error) => {
-          console.log(
+          logger.error(
             "tried to buy item, but failed",
             event.asset.token_id,
             error
