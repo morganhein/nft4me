@@ -1,12 +1,26 @@
-import Web3 from 'web3'
-import { OpenSeaPort, Network } from 'opensea-js'
-import { Check } from "./watcher";
+import { Nftbot } from "./nftbot";
+import { HTTPRetriever, IOpenSeaSearch } from "./searcher";
+import { Web3Market, IBlockMarket } from "./market";
 
-// This example provider won't let you make transactions, only read-only calls:
-const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io')
+function main() {
+  //TODO: need to grab/parse invocation arguments
+  const collection: string = "weape24";
+  const gasLimit: number = 3;
+  const weiLimit: number = 1;
+  const ethLimit: number = 0.02;
+  let searcher: IOpenSeaSearch = new HTTPRetriever(
+    "https://api.opensea.io/api/v1/events"
+  );
+  let market: IBlockMarket = new Web3Market("https://mainnet.infura.io");
+  let nftBot = new Nftbot(
+    searcher,
+    market,
+    collection,
+    ethLimit,
+    gasLimit,
+    weiLimit
+  );
+  nftBot.start();
+}
 
-const seaport = new OpenSeaPort(provider, {
-  networkName: Network.Main
-})
-
-Check("https://api.opensea.io/api/v1/events?", "collection_slug=weape24&event_type=created&only_opensea=false&offset=0&limit=20")
+main();
