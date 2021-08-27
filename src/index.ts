@@ -1,20 +1,22 @@
-import { ENV } from "./config";
+import { Config } from "./config";
 import { Nftbot } from "./nftbot";
 import { HTTPRetriever, IOpenSeaSearch } from "./searcher";
 import { Web3Market, IBlockMarket } from "./market";
 
-function main() {
-  const collection: string = "weape24";
-  let searcher: IOpenSeaSearch = new HTTPRetriever(ENV.OpenSeaHTTPAPI);
-  let market: IBlockMarket = new Web3Market(ENV.MarketHost, ENV.SourceWallet);
+async function main() {
+  let c = Config("live");
+  let searcher: IOpenSeaSearch = new HTTPRetriever(c.OpenSeaHTTPAPI);
+  let market: IBlockMarket = new Web3Market(c.MarketHost, c.SourceWallet);
   let nftBot = new Nftbot(
     searcher,
     market,
-    collection,
-    +ENV.EthLimit,
-    +ENV.GasLimit
+    c.Collection,
+    +c.EthLimit,
+    +c.GasLimit
   );
-  nftBot.start();
+  await nftBot.start();
 }
 
-main();
+main().then(() => {
+  console.log("finished running");
+});

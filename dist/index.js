@@ -11,5 +11,7 @@ function main() {
     var nftBot = new nftbot_1.Nftbot(searcher, market, collection, +config_1.ENV.EthLimit, +config_1.ENV.GasLimit);
     nftBot.start();
 }
-main();
+// main();
+console.log(config_1.ENV.Collection);
+console.log(config_1.ENV.MarketHost);
 //# sourceMappingURL=index.js.map

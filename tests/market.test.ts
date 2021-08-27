@@ -1,8 +1,10 @@
 import { IBlockMarket, Web3Market } from "../src/market";
-import { ENV } from "../src/config";
+import { Config } from "../src/config";
 
 describe("OpenSea SDK", function () {
-  const market: IBlockMarket = new Web3Market(ENV.MarketHost, ENV.SourceWallet);
+  let c = Config("tests");
+
+  const market: IBlockMarket = new Web3Market(c.MarketHost, c.SourceWallet);
 
   const contractAddress = "0x495f947276749ce646f68ac8c248420045cb7b5e";
   const tokenId =
@@ -13,7 +15,6 @@ describe("OpenSea SDK", function () {
       const gas = await market.getGas();
       expect(gas).not.toBeNull();
       expect(gas).not.toEqual("-1");
-      console.log(gas);
     } catch (error) {
       expect(error).toBeNull();
     }

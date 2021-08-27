@@ -36,8 +36,8 @@ exports.ENV = {
 };
 var argv = yargs_1.default(process.argv.slice(2))
     .options({
-    COLLECTION: { type: "string", demandOption: true },
-    WALLET: { type: "string" },
+    collection: { type: "string", demandOption: true },
+    wallet: { type: "string" },
 })
     .parseSync();
 if (argv.wallet) {
