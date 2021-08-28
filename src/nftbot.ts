@@ -44,7 +44,8 @@ export class Nftbot {
     private market: IBlockMarket,
     private collection: string,
     private ethLimit: BigNumber,
-    private gasLimit: BigNumber //total amount of gas used for tx
+    private gasLimit: BigNumber, //total amount of gas used for tx
+    private dryRun: boolean
   ) {}
   async start() {
     let run: boolean = true;

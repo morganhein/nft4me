@@ -12,7 +12,8 @@ export interface IBlockMarket {
   buyAsset(
     tokenAddress: string,
     tokenId: string,
-    amount: BigNumber
+    amount: BigNumber,
+    dryRun: boolean
   ): Promise<Order>;
   getGas(): Promise<string>;
   getOrders(contractAddress: string, token_id: string): Promise<Order[]>;
@@ -35,9 +36,15 @@ export class Web3Market implements IBlockMarket {
   async buyAsset(
     tokenAddress: string,
     tokenId: string,
-    amount: BigNumber
+    amount: BigNumber,
+    dryRun: boolean
   ): Promise<Order> {
     return new Promise<Order>(async (resolve, reject) => {
+      if (dryRun) {
+        logger.info("Dryrun enabled, would have bought", tokenId);
+        resolve({} as Order);
+        return;
+      }
       try {
         let buyOrder = await this.seaport.createBuyOrder({
           asset: {

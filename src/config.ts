@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 import yargs from "yargs/yargs";
+import { logger } from "./logging";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ export function Config(environment: string): IConfig {
     EthLimit: process.env.ETH_LIMIT as string,
     MarketHost: process.env.MARKET_HOST as string,
     OpenSeaHTTPAPI: process.env.OPEN_SEA_API as string,
+    DryRun: false,
     SourceWallet: "",
     Collection: "",
   };
@@ -32,6 +34,7 @@ export function Config(environment: string): IConfig {
     .options({
       collection: { type: "string", demandOption: true },
       wallet: { type: "string" },
+      dryrun: { type: "boolean", default: false },
     })
     .parseSync();
 
@@ -41,6 +44,11 @@ export function Config(environment: string): IConfig {
 
   if (argv.collection) {
     env.Collection = argv.collection as string;
+  }
+
+  if (argv.dryrun) {
+    logger.info("dryrun enabled");
+    env.DryRun = argv.dryrun as boolean;
   }
   return env;
 }
