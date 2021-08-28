@@ -3,6 +3,7 @@ import Web3 from "web3";
 import { provider } from "web3-core";
 import { OpenSeaAsset, Order, OrderSide } from "opensea-js/lib/types";
 import { logger } from "./logging";
+import { BigNumber } from "bignumber.js";
 
 //operations that are performed against the OpenSea SDK on the Ethereum blockchain, not the
 //OpenSea API over http
@@ -11,7 +12,7 @@ export interface IBlockMarket {
   buyAsset(
     tokenAddress: string,
     tokenId: string,
-    amount: number
+    amount: BigNumber
   ): Promise<Order>;
   getGas(): Promise<string>;
   getOrders(contractAddress: string, token_id: string): Promise<Order[]>;
@@ -34,7 +35,7 @@ export class Web3Market implements IBlockMarket {
   async buyAsset(
     tokenAddress: string,
     tokenId: string,
-    amount: number
+    amount: BigNumber
   ): Promise<Order> {
     return new Promise<Order>(async (resolve, reject) => {
       try {
@@ -44,7 +45,7 @@ export class Web3Market implements IBlockMarket {
             tokenAddress,
           } as OpenSeaAsset,
           accountAddress: this.walletAddress,
-          startAmount: amount,
+          startAmount: amount.toNumber(),
           quantity: 1,
           // expirationTime: "",
         });
@@ -92,6 +93,14 @@ export class Web3Market implements IBlockMarket {
         });
         if (orders.count == 0) {
           reject("no orders found at that address");
+        }
+        if (orders.count != orders.orders.length) {
+          reject(
+            "incorrect amount of orders returned, expected " +
+              orders.count +
+              " but found " +
+              orders.orders.length
+          );
         }
         resolve(orders.orders);
       } catch (error) {
