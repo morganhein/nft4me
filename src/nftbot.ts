@@ -103,11 +103,13 @@ export class Nftbot {
       //todo: @aaron is the contract address here correct?
       let orders: Order[];
       try {
+        //todo: there is an optimization here where we can get orders for 30 different token_ids per request
         orders = await this.market.getOrders(
           event.contract_address,
           event.asset.token_id
         );
       } catch (error) {
+        //todo: detect if this error is a throttled response and handle appropriately
         logger.error(error);
         continue;
       }
