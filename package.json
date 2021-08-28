@@ -10,6 +10,7 @@
     "lint": "eslint \"**/*.ts\""
   },
   "dependencies": {
+    "@0x/subproviders": "^6.6.0",
     "dotenv": "^10.0.0",
     "opensea-js": "^1.1.13",
     "pino": "^6.13.1",

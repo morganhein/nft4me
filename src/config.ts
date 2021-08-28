@@ -8,22 +8,42 @@ export interface IConfig {
   SourceWallet: string;
   GasLimit: string;
   EthLimit: string;
-  MarketHost: string;
-  OpenSeaHTTPAPI: string;
+  NetworkName: string;
+  NetworkURI: string;
+  OpenSeaAPI: string;
+  OpenSeaAPIKey: string;
+  InfuraKey: string;
   Collection: string;
   DryRun: boolean;
+  Mnemonic: string;
 }
 
 export function Config(environment: string): IConfig {
   let env = {
+    SourceWallet: "",
     GasLimit: process.env.GAS_LIMIT as string,
     EthLimit: process.env.ETH_LIMIT as string,
-    MarketHost: process.env.MARKET_HOST as string,
-    OpenSeaHTTPAPI: process.env.OPEN_SEA_API as string,
-    DryRun: false,
-    SourceWallet: "",
+    NetworkName: process.env.Network as string,
+    NetworkURI: "",
+    OpenSeaAPIKey: process.env.OPEN_SEA_API_KEY as string,
+    OpenSeaAPI: process.env.OPEN_SEA_API as string,
+    InfuraKey: process.env.INFURA_KEY as string,
     Collection: "",
+    DryRun: false,
+    Mnemonic: process.env.MNEMONIC as string,
   };
+  const isInfura = !!env.InfuraKey;
+  const networkName =
+    env.NetworkName === "mainnet" || env.NetworkName === "live"
+      ? "mainnet"
+      : "rinkeby";
+
+  const NetworkAPIKey = process.env.INFURA_KEY || process.env.ALCHEMY_KEY;
+
+  env.NetworkURI = isInfura
+    ? "https://" + networkName + ".infura.io/v3/" + NetworkAPIKey
+    : "https://eth-" + networkName + ".alchemyapi.io/v2/" + NetworkAPIKey;
+
   if (environment === "tests") {
     //todo: maybe add some test collection/source-wallet stuff?
     return env;

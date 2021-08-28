@@ -132,8 +132,8 @@ export class Nftbot {
       });
       this.market
         .buyAsset(
-          event.asset.token_id,
           event.asset.asset_contract.address,
+          event.asset.token_id,
           sellOrder.currentPrice as BigNumber,
           this.dryRun
         )

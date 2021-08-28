@@ -4,6 +4,12 @@ import { provider } from "web3-core";
 import { OpenSeaAsset, Order, OrderSide } from "opensea-js/lib/types";
 import { logger } from "./logging";
 import { BigNumber } from "bignumber.js";
+import {
+  MnemonicWalletSubprovider,
+  RPCSubprovider,
+  Web3ProviderEngine,
+} from "@0x/subproviders";
+import { IConfig } from "./config";
 
 //operations that are performed against the OpenSea SDK on the Ethereum blockchain, not the
 //OpenSea API over http
@@ -19,18 +25,17 @@ export interface IBlockMarket {
   getOrders(contractAddress: string, token_id: string): Promise<Order[]>;
 }
 
-export class Web3Market implements IBlockMarket {
-  readonly provider: provider;
-  private seaport: OpenSeaPort;
-  private w3;
-  constructor(private host: string, private walletAddress: string) {
-    this.provider = new Web3.providers.HttpProvider(
-      host //"https://mainnet.infura.io"
-    );
-    this.seaport = new OpenSeaPort(this.provider, {
-      networkName: Network.Main,
-    });
-    this.w3 = new Web3(this.provider);
+export class Market implements IBlockMarket {
+  // @ts-ignore
+  protected provider: provider;
+  // @ts-ignore
+  protected seaport: OpenSeaPort;
+  // @ts-ignore
+  protected w3;
+  protected network: string;
+  constructor(private config: IConfig) {
+    this.config = config;
+    this.network = config.NetworkURI;
   }
 
   async buyAsset(
@@ -51,7 +56,7 @@ export class Web3Market implements IBlockMarket {
             tokenId,
             tokenAddress,
           } as OpenSeaAsset,
-          accountAddress: this.walletAddress,
+          accountAddress: this.config.SourceWallet,
           startAmount: amount.toNumber(),
           quantity: 1,
           // expirationTime: "",
@@ -120,5 +125,52 @@ export class Web3Market implements IBlockMarket {
         reject(error);
       }
     });
+  }
+}
+
+export class Web3Market extends Market {
+  constructor(config: IConfig) {
+    super(config);
+    const BASE_DERIVATION_PATH = `44'/60'/0'/0`;
+
+    const mnemonicWalletSubprovider = new MnemonicWalletSubprovider({
+      mnemonic: "MNEMONIC",
+      baseDerivationPath: BASE_DERIVATION_PATH,
+    });
+
+    const API_KEY = process.env.API_KEY || "";
+
+    const infuraRpcSubprovider = new RPCSubprovider(this.network);
+
+    const providerEngine = new Web3ProviderEngine();
+    this.provider = providerEngine;
+    providerEngine.addProvider(mnemonicWalletSubprovider);
+    providerEngine.addProvider(infuraRpcSubprovider);
+    providerEngine.start();
+
+    this.seaport = new OpenSeaPort(
+      providerEngine,
+      {
+        networkName:
+          config.NetworkName === "mainnet" || config.NetworkName === "live"
+            ? Network.Main
+            : Network.Rinkeby,
+        apiKey: API_KEY,
+      },
+      (arg) => console.log(arg)
+    );
+
+    this.w3 = new Web3(this.provider);
+  }
+}
+
+export class HTTPMarket extends Market {
+  constructor(config: IConfig) {
+    super(config);
+    this.provider = new Web3.providers.HttpProvider(this.network);
+    this.seaport = new OpenSeaPort(this.provider, {
+      networkName: Network.Main,
+    });
+    this.w3 = new Web3(this.provider);
   }
 }
