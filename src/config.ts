@@ -23,7 +23,7 @@ export function Config(environment: string): IConfig {
     SourceWallet: "",
     GasLimit: process.env.GAS_LIMIT as string,
     EthLimit: process.env.ETH_LIMIT as string,
-    NetworkName: process.env.Network as string,
+    NetworkName: process.env.NETWORK as string,
     NetworkURI: "",
     OpenSeaAPIKey: process.env.OPEN_SEA_API_KEY as string,
     OpenSeaAPI: process.env.OPEN_SEA_API as string,
