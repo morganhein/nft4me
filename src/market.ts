@@ -92,6 +92,11 @@ export class Web3Market implements IBlockMarket {
 
   async getOrders(contractAddress: string, token_id: string): Promise<Order[]> {
     return new Promise<Order[]>(async (resolve, reject) => {
+      logger.info({
+        message: "retrieving orders",
+        token_id: token_id,
+        asset_contract_address: contractAddress,
+      });
       try {
         let orders = await this.seaport.api.getOrders({
           asset_contract_address: contractAddress,

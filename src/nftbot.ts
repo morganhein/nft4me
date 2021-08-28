@@ -49,14 +49,18 @@ export class Nftbot {
   ) {}
   async start() {
     let run: boolean = true;
+    logger.info("NFTBot starting.");
     while (run) {
       //gas limiter
       //this silly thing (the + sign) converts the string to a number
+      logger.info("Retrieving gas");
       const gas: BigNumber = new BigNumber(await this.market.getGas());
-      if (gas > this.gasLimit || gas.eq("-1")) {
-        await delay(500);
+      if (this.gasLimit.comparedTo(gas) === -1 || gas.eq(-1)) {
+        logger.info("Gas too high or unavailable: " + gas);
+        await delay(2000);
         continue;
       }
+      logger.info("Gas is acceptable at: " + gas.toNumber());
       //paginate through searcher results.. it would be awesome if this could be async so that it can be run in parallel
       //for each asset, run it through a set of rules to determine what to do with it
       //buy, and notify!
@@ -74,6 +78,11 @@ export class Nftbot {
         await delay(500);
         continue;
       }
+      logger.info({
+        message: "Found search results for collection",
+        count: results.asset_events.length,
+        collection: this.collection,
+      });
       //now run each of the assets through the rules to determine if we should buy
       await this.handleResults(results, gas);
       this.pageOffset += this.pageLimit;
@@ -89,18 +98,24 @@ export class Nftbot {
   }
   async handleResults(results: SearchResults, gas: BigNumber) {
     for (const e in results.asset_events) {
+      await delay(700);
       const event = results.asset_events[e];
-      //todo: get the orders for this collection
       //todo: @aaron is the contract address here correct?
-      let orders: Order[] = await this.market.getOrders(
-        event.contract_address,
-        event.asset.asset_contract.address
-      );
+      let orders: Order[];
+      try {
+        orders = await this.market.getOrders(
+          event.contract_address,
+          event.asset.token_id
+        );
+      } catch (error) {
+        logger.error(error);
+        continue;
+      }
+
       const sellOrder = getSellOrder(event.asset.token_id, orders);
       if (sellOrder === undefined) {
         logger.info(
-          "Sell order not found or undefined for asset",
-          event.asset.token_id
+          "Sell order not found or undefined for asset: " + event.asset.token_id
         );
         continue;
       }
@@ -108,6 +123,11 @@ export class Nftbot {
       if (!buy) {
         continue;
       }
+      logger.info({
+        message: "Found an order worth buying",
+        token_id: event.asset.token_id,
+        worth: sellOrder.currentPrice,
+      });
       this.market
         .buyAsset(
           event.asset.token_id,

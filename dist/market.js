@@ -157,13 +157,20 @@ var Web3Market = /** @class */ (function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 2, , 3]);
+                                    logging_1.logger.info({
+                                        message: "retrieving orders",
+                                        token_id: token_id,
+                                        asset_contract_address: contractAddress,
+                                    });
+                                    _a.label = 1;
+                                case 1:
+                                    _a.trys.push([1, 3, , 4]);
                                     return [4 /*yield*/, this.seaport.api.getOrders({
                                             asset_contract_address: contractAddress,
                                             token_id: token_id,
                                             side: types_1.OrderSide.Sell,
                                         })];
-                                case 1:
+                                case 2:
                                     orders = _a.sent();
                                     if (orders.count == 0) {
                                         reject("no orders found at that address");
@@ -175,13 +182,13 @@ var Web3Market = /** @class */ (function () {
                                             orders.orders.length);
                                     }
                                     resolve(orders.orders);
-                                    return [3 /*break*/, 3];
-                                case 2:
+                                    return [3 /*break*/, 4];
+                                case 3:
                                     error_3 = _a.sent();
                                     logging_1.logger.error("error retrieving orders", error_3);
                                     reject(error_3);
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    return [3 /*break*/, 4];
+                                case 4: return [2 /*return*/];
                             }
                         });
                     }); })];

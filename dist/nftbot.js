@@ -89,19 +89,25 @@ var Nftbot = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         run = true;
+                        logging_1.logger.info("NFTBot starting.");
                         _b.label = 1;
                     case 1:
                         if (!run) return [3 /*break*/, 12];
+                        //gas limiter
+                        //this silly thing (the + sign) converts the string to a number
+                        logging_1.logger.info("Retrieving gas");
                         _a = bignumber_js_1.BigNumber.bind;
                         return [4 /*yield*/, this.market.getGas()];
                     case 2:
                         gas = new (_a.apply(bignumber_js_1.BigNumber, [void 0, _b.sent()]))();
-                        if (!(gas > this.gasLimit || gas.eq("-1"))) return [3 /*break*/, 4];
-                        return [4 /*yield*/, delay(500)];
+                        if (!(this.gasLimit.comparedTo(gas) === -1 || gas.eq(-1))) return [3 /*break*/, 4];
+                        logging_1.logger.info("Gas too high or unavailable: " + gas);
+                        return [4 /*yield*/, delay(2000)];
                     case 3:
                         _b.sent();
                         return [3 /*break*/, 1];
                     case 4:
+                        logging_1.logger.info("Gas is acceptable at: " + gas.toNumber());
                         results = void 0;
                         _b.label = 5;
                     case 5:
@@ -119,9 +125,14 @@ var Nftbot = /** @class */ (function () {
                         //todo: should this timer backoff?
                         _b.sent();
                         return [3 /*break*/, 1];
-                    case 9: 
-                    //now run each of the assets through the rules to determine if we should buy
-                    return [4 /*yield*/, this.handleResults(results, gas)];
+                    case 9:
+                        logging_1.logger.info({
+                            message: "Found search results for collection",
+                            count: results.asset_events.length,
+                            collection: this.collection,
+                        });
+                        //now run each of the assets through the rules to determine if we should buy
+                        return [4 /*yield*/, this.handleResults(results, gas)];
                     case 10:
                         //now run each of the assets through the rules to determine if we should buy
                         _b.sent();
@@ -148,23 +159,40 @@ var Nftbot = /** @class */ (function () {
                 switch (_c.label) {
                     case 0:
                         _loop_1 = function (e) {
-                            var event_1, orders, sellOrder, buy;
+                            var event_1, orders, error_1, sellOrder, buy;
                             return __generator(this, function (_d) {
                                 switch (_d.label) {
-                                    case 0:
-                                        event_1 = results.asset_events[e];
-                                        return [4 /*yield*/, this_1.market.getOrders(event_1.contract_address, event_1.asset.asset_contract.address)];
+                                    case 0: return [4 /*yield*/, delay(700)];
                                     case 1:
+                                        _d.sent();
+                                        event_1 = results.asset_events[e];
+                                        orders = void 0;
+                                        _d.label = 2;
+                                    case 2:
+                                        _d.trys.push([2, 4, , 5]);
+                                        return [4 /*yield*/, this_1.market.getOrders(event_1.contract_address, event_1.asset.token_id)];
+                                    case 3:
                                         orders = _d.sent();
+                                        return [3 /*break*/, 5];
+                                    case 4:
+                                        error_1 = _d.sent();
+                                        logging_1.logger.error(error_1);
+                                        return [2 /*return*/, "continue"];
+                                    case 5:
                                         sellOrder = getSellOrder(event_1.asset.token_id, orders);
                                         if (sellOrder === undefined) {
-                                            logging_1.logger.info("Sell order not found or undefined for asset", event_1.asset.token_id);
+                                            logging_1.logger.info("Sell order not found or undefined for asset: " + event_1.asset.token_id);
                                             return [2 /*return*/, "continue"];
                                         }
                                         buy = this_1.shouldBuy(event_1, gas, sellOrder);
                                         if (!buy) {
                                             return [2 /*return*/, "continue"];
                                         }
+                                        logging_1.logger.info({
+                                            message: "Found an order worth buying",
+                                            token_id: event_1.asset.token_id,
+                                            worth: sellOrder.currentPrice,
+                                        });
                                         this_1.market
                                             .buyAsset(event_1.asset.token_id, event_1.asset.asset_contract.address, sellOrder.currentPrice, this_1.dryRun)
                                             .then(function (response) {

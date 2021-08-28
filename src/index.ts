@@ -7,6 +7,7 @@ import { BigNumber } from "bignumber.js";
 
 async function main() {
   let c = Config("live");
+  logger.info(c);
   let searcher: IOpenSeaSearch = new HTTPRetriever(c.OpenSeaHTTPAPI);
   let market: IBlockMarket = new Web3Market(c.MarketHost, c.SourceWallet);
   let nftBot = new Nftbot(

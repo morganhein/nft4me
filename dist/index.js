@@ -49,6 +49,7 @@ function main() {
             switch (_a.label) {
                 case 0:
                     c = config_1.Config("live");
+                    logging_1.logger.info(c);
                     searcher = new searcher_1.HTTPRetriever(c.OpenSeaHTTPAPI);
                     market = new market_1.Web3Market(c.MarketHost, c.SourceWallet);
                     nftBot = new nftbot_1.Nftbot(searcher, market, c.Collection, new bignumber_js_1.BigNumber(c.EthLimit), new bignumber_js_1.BigNumber(c.GasLimit), c.DryRun);
