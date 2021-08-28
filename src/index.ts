@@ -3,6 +3,7 @@ import { Nftbot } from "./nftbot";
 import { HTTPRetriever, IOpenSeaSearch } from "./searcher";
 import { Web3Market, IBlockMarket } from "./market";
 import { logger } from "./logging";
+import { BigNumber } from "bignumber.js";
 
 async function main() {
   let c = Config("live");
@@ -12,8 +13,9 @@ async function main() {
     searcher,
     market,
     c.Collection,
-    +c.EthLimit,
-    +c.GasLimit
+    new BigNumber(c.EthLimit),
+    new BigNumber(c.GasLimit),
+    c.DryRun
   );
   await nftBot.start();
 }

@@ -112,7 +112,8 @@ export class Nftbot {
         .buyAsset(
           event.asset.token_id,
           event.asset.asset_contract.address,
-          sellOrder.currentPrice as BigNumber
+          sellOrder.currentPrice as BigNumber,
+          this.dryRun
         )
         .then((response) => {
           logger.info("item bought successfully", response.asset?.name);

@@ -43,6 +43,7 @@ exports.Web3Market = void 0;
 var opensea_js_1 = require("opensea-js");
 var web3_1 = __importDefault(require("web3"));
 var types_1 = require("opensea-js/lib/types");
+var logging_1 = require("./logging");
 var Web3Market = /** @class */ (function () {
     function Web3Market(host, walletAddress) {
         this.host = host;
@@ -54,7 +55,7 @@ var Web3Market = /** @class */ (function () {
         });
         this.w3 = new web3_1.default(this.provider);
     }
-    Web3Market.prototype.buyAsset = function (tokenAddress, tokenId, amount) {
+    Web3Market.prototype.buyAsset = function (tokenAddress, tokenId, amount, dryRun) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -63,27 +64,34 @@ var Web3Market = /** @class */ (function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 2, , 3]);
+                                    if (dryRun) {
+                                        logging_1.logger.info("Dryrun enabled, would have bought", tokenId);
+                                        resolve({});
+                                        return [2 /*return*/];
+                                    }
+                                    _a.label = 1;
+                                case 1:
+                                    _a.trys.push([1, 3, , 4]);
                                     return [4 /*yield*/, this.seaport.createBuyOrder({
                                             asset: {
                                                 tokenId: tokenId,
                                                 tokenAddress: tokenAddress,
                                             },
                                             accountAddress: this.walletAddress,
-                                            startAmount: amount,
+                                            startAmount: amount.toNumber(),
                                             quantity: 1,
                                             // expirationTime: "",
                                         })];
-                                case 1:
+                                case 2:
                                     buyOrder = _a.sent();
                                     resolve(buyOrder);
-                                    return [3 /*break*/, 3];
-                                case 2:
+                                    return [3 /*break*/, 4];
+                                case 3:
                                     error_1 = _a.sent();
-                                    console.log("error buying asset", error_1);
+                                    logging_1.logger.error("error buying asset", error_1);
                                     reject(error_1);
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    return [3 /*break*/, 4];
+                                case 4: return [2 /*return*/];
                             }
                         });
                     }); })];
@@ -132,7 +140,7 @@ var Web3Market = /** @class */ (function () {
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2:
                         error_2 = _a.sent();
-                        console.log(error_2);
+                        logging_1.logger.error(error_2);
                         //return -1 here so we don't accidentally buy tons of shit when the gas price is above 200 but this query failed
                         return [2 /*return*/, "-1"];
                     case 3: return [2 /*return*/];
@@ -160,11 +168,17 @@ var Web3Market = /** @class */ (function () {
                                     if (orders.count == 0) {
                                         reject("no orders found at that address");
                                     }
+                                    if (orders.count != orders.orders.length) {
+                                        reject("incorrect amount of orders returned, expected " +
+                                            orders.count +
+                                            " but found " +
+                                            orders.orders.length);
+                                    }
                                     resolve(orders.orders);
                                     return [3 /*break*/, 3];
                                 case 2:
                                     error_3 = _a.sent();
-                                    console.log("error retrieving orders", error_3);
+                                    logging_1.logger.error("error retrieving orders", error_3);
                                     reject(error_3);
                                     return [3 /*break*/, 3];
                                 case 3: return [2 /*return*/];

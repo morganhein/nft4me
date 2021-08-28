@@ -11,6 +11,7 @@ export interface IConfig {
   MarketHost: string;
   OpenSeaHTTPAPI: string;
   Collection: string;
+  DryRun: boolean;
 }
 
 export function Config(environment: string): IConfig {

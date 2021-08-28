@@ -37,6 +37,30 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Nftbot = void 0;
+var logging_1 = require("./logging");
+var bignumber_js_1 = require("bignumber.js");
+function getSellOrder(token_id, orders) {
+    var _a;
+    var foundOrder;
+    for (var ordersKey in orders) {
+        var order = orders[ordersKey];
+        if (order === null || order.currentPrice === undefined) {
+            continue;
+        }
+        if (((_a = order.asset) === null || _a === void 0 ? void 0 : _a.tokenId) != token_id) {
+            continue;
+        }
+        if (foundOrder === undefined) {
+            foundOrder = order;
+            continue;
+        }
+        // @ts-ignore
+        if (order.currentPrice < foundOrder.currentPrice) {
+            foundOrder = order;
+        }
+    }
+    return foundOrder;
+}
 /*
  * Start watching the listings based on collection,
  * set max ether price
@@ -47,58 +71,60 @@ exports.Nftbot = void 0;
  * ganache, local mainnet
  * */
 var Nftbot = /** @class */ (function () {
-    function Nftbot(searcher, market, collection, ethLimit, gasLimit //total amount of gas used for tx
-    ) {
+    function Nftbot(searcher, market, collection, ethLimit, gasLimit, //total amount of gas used for tx
+    dryRun) {
         this.searcher = searcher;
         this.market = market;
         this.collection = collection;
         this.ethLimit = ethLimit;
         this.gasLimit = gasLimit;
+        this.dryRun = dryRun;
         this.pageOffset = 0;
         this.pageLimit = 50; //this is the cap
     }
     Nftbot.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var run, gas, results, err_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var run, gas, _a, results, err_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         run = true;
-                        _a.label = 1;
+                        _b.label = 1;
                     case 1:
                         if (!run) return [3 /*break*/, 12];
+                        _a = bignumber_js_1.BigNumber.bind;
                         return [4 /*yield*/, this.market.getGas()];
                     case 2:
-                        gas = +(_a.sent());
-                        if (!(gas > this.gasLimit || gas === -1)) return [3 /*break*/, 4];
+                        gas = new (_a.apply(bignumber_js_1.BigNumber, [void 0, _b.sent()]))();
+                        if (!(gas > this.gasLimit || gas.eq("-1"))) return [3 /*break*/, 4];
                         return [4 /*yield*/, delay(500)];
                     case 3:
-                        _a.sent();
+                        _b.sent();
                         return [3 /*break*/, 1];
                     case 4:
                         results = void 0;
-                        _a.label = 5;
+                        _b.label = 5;
                     case 5:
-                        _a.trys.push([5, 7, , 9]);
+                        _b.trys.push([5, 7, , 9]);
                         return [4 /*yield*/, this.searcher.Check(this.collection, "created", this.pageOffset, this.pageLimit)];
                     case 6:
-                        results = _a.sent();
+                        results = _b.sent();
                         return [3 /*break*/, 9];
                     case 7:
-                        err_1 = _a.sent();
-                        console.log(err_1);
+                        err_1 = _b.sent();
+                        logging_1.logger.error(err_1);
                         //todo: should this timer backoff?
                         return [4 /*yield*/, delay(500)];
                     case 8:
                         //todo: should this timer backoff?
-                        _a.sent();
+                        _b.sent();
                         return [3 /*break*/, 1];
                     case 9: 
                     //now run each of the assets through the rules to determine if we should buy
                     return [4 /*yield*/, this.handleResults(results, gas)];
                     case 10:
                         //now run each of the assets through the rules to determine if we should buy
-                        _a.sent();
+                        _b.sent();
                         this.pageOffset += this.pageLimit;
                         //if the collection was empty, or is less than 50 items, then we are at the end of the results
                         if (results.asset_events.length < 50) {
@@ -108,7 +134,7 @@ var Nftbot = /** @class */ (function () {
                         return [4 /*yield*/, delay(500)];
                     case 11:
                         //todo: it would be smarter to check how long ago the last refresh was, and if over 500ms just start immediately
-                        _a.sent();
+                        _b.sent();
                         return [3 /*break*/, 1];
                     case 12: return [2 /*return*/];
                 }
@@ -122,7 +148,7 @@ var Nftbot = /** @class */ (function () {
                 switch (_c.label) {
                     case 0:
                         _loop_1 = function (e) {
-                            var event_1, orders, buy;
+                            var event_1, orders, sellOrder, buy;
                             return __generator(this, function (_d) {
                                 switch (_d.label) {
                                     case 0:
@@ -130,20 +156,23 @@ var Nftbot = /** @class */ (function () {
                                         return [4 /*yield*/, this_1.market.getOrders(event_1.contract_address, event_1.asset.asset_contract.address)];
                                     case 1:
                                         orders = _d.sent();
-                                        buy = this_1.shouldBuy(event_1, gas, orders);
+                                        sellOrder = getSellOrder(event_1.asset.token_id, orders);
+                                        if (sellOrder === undefined) {
+                                            logging_1.logger.info("Sell order not found or undefined for asset", event_1.asset.token_id);
+                                            return [2 /*return*/, "continue"];
+                                        }
+                                        buy = this_1.shouldBuy(event_1, gas, sellOrder);
                                         if (!buy) {
                                             return [2 /*return*/, "continue"];
                                         }
                                         this_1.market
-                                            //todo: put amount here
-                                            .buyAsset(event_1.asset.token_id, event_1.asset.asset_contract.address, 0)
+                                            .buyAsset(event_1.asset.token_id, event_1.asset.asset_contract.address, sellOrder.currentPrice, this_1.dryRun)
                                             .then(function (response) {
                                             var _a;
-                                            //todo: better logging, maybe send to discord or something
-                                            console.log("item bought successfully", (_a = response.asset) === null || _a === void 0 ? void 0 : _a.name);
+                                            logging_1.logger.info("item bought successfully", (_a = response.asset) === null || _a === void 0 ? void 0 : _a.name);
                                         })
                                             .catch(function (error) {
-                                            console.log("tried to buy item, but failed", event_1.asset.token_id, error);
+                                            logging_1.logger.error("tried to buy item, but failed", event_1.asset.token_id, error);
                                         });
                                         return [2 /*return*/];
                                 }
@@ -171,18 +200,13 @@ var Nftbot = /** @class */ (function () {
         });
     };
     //TODO: this might be a rules engine in the future
-    Nftbot.prototype.shouldBuy = function (event, gas, orders) {
+    Nftbot.prototype.shouldBuy = function (event, gas, order) {
+        if (order.currentPrice === undefined) {
+            logging_1.logger.info("Sell price not found or undefined for order");
+            return false;
+        }
         //is the eth cost acceptable?
-        //get the orders for this tokenAddress, and then find sell orders for that tokenId
-        var starting_price = +event.starting_price;
-        if (starting_price > this.ethLimit) {
-            return false;
-        }
-        //check if gwei price matches
-        if (event.asset.asset_contract.buyer_fee_basis_points > this.gasLimit) {
-            return false;
-        }
-        return false;
+        return order.currentPrice <= this.ethLimit;
     };
     return Nftbot;
 }());
