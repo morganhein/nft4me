@@ -10,11 +10,13 @@ async function main() {
   logger.info(c);
   let searcher: IOpenSeaSearch = new HTTPRetriever(c.OpenSeaAPI);
   let market: IBlockMarket;
-  if (c.Mnemonic.length === 0) {
+  if (c.Mnemonic.length === 0 || c.SourceWallet.length === 0) {
     //we don't have a mnemonic, so just use http market
     market = new HTTPMarket(c);
+    logger.info("No mnemonic or wallet address found, using HTTP market.");
   } else {
     //we have a mnemonic, so try to login
+    logger.info("Mnemonic & wallet address found, using Web3Market.");
     market = new Web3Market(c);
   }
   let nftBot = new Nftbot(

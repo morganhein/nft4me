@@ -51,12 +51,14 @@ function main() {
                     c = config_1.Config("live");
                     logging_1.logger.info(c);
                     searcher = new searcher_1.HTTPRetriever(c.OpenSeaAPI);
-                    if (c.Mnemonic.length === 0) {
+                    if (c.Mnemonic.length === 0 || c.SourceWallet.length === 0) {
                         //we don't have a mnemonic, so just use http market
                         market = new market_1.HTTPMarket(c);
+                        logging_1.logger.info("No mnemonic or wallet address found, using HTTP market.");
                     }
                     else {
                         //we have a mnemonic, so try to login
+                        logging_1.logger.info("Mnemonic & wallet address found, using Web3Market.");
                         market = new market_1.Web3Market(c);
                     }
                     nftBot = new nftbot_1.Nftbot(searcher, market, c.Collection, new bignumber_js_1.BigNumber(c.EthLimit), new bignumber_js_1.BigNumber(c.GasLimit), c.DryRun);

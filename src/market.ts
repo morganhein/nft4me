@@ -27,8 +27,6 @@ export interface IBlockMarket {
 
 export class Market implements IBlockMarket {
   // @ts-ignore
-  protected provider: provider;
-  // @ts-ignore
   protected seaport: OpenSeaPort;
   // @ts-ignore
   protected w3;
@@ -134,43 +132,41 @@ export class Web3Market extends Market {
     const BASE_DERIVATION_PATH = `44'/60'/0'/0`;
 
     const mnemonicWalletSubprovider = new MnemonicWalletSubprovider({
-      mnemonic: "MNEMONIC",
+      mnemonic: config.Mnemonic,
       baseDerivationPath: BASE_DERIVATION_PATH,
     });
-
-    const API_KEY = process.env.API_KEY || "";
 
     const infuraRpcSubprovider = new RPCSubprovider(this.network);
 
     const providerEngine = new Web3ProviderEngine();
-    this.provider = providerEngine;
     providerEngine.addProvider(mnemonicWalletSubprovider);
     providerEngine.addProvider(infuraRpcSubprovider);
     providerEngine.start();
 
-    this.seaport = new OpenSeaPort(
-      providerEngine,
-      {
-        networkName:
-          config.NetworkName === "mainnet" || config.NetworkName === "live"
-            ? Network.Main
-            : Network.Rinkeby,
-        apiKey: API_KEY,
-      },
-      (arg) => console.log(arg)
-    );
+    //
+    // this.seaport = new OpenSeaPort(
+    //   providerEngine,
+    //   {
+    //     networkName:
+    //       config.NetworkName === "mainnet" || config.NetworkName === "live"
+    //         ? Network.Main
+    //         : Network.Rinkeby,
+    //     apiKey: config.OpenSeaAPIKey,
+    //   },
+    //   (arg) => console.log(arg)
+    // );
 
-    this.w3 = new Web3(this.provider);
+    this.w3 = new Web3(new Web3.providers.HttpProvider(this.network));
   }
 }
 
 export class HTTPMarket extends Market {
   constructor(config: IConfig) {
     super(config);
-    this.provider = new Web3.providers.HttpProvider(this.network);
-    this.seaport = new OpenSeaPort(this.provider, {
+    const provider = new Web3.providers.HttpProvider(this.network);
+    this.seaport = new OpenSeaPort(provider, {
       networkName: Network.Main,
     });
-    this.w3 = new Web3(this.provider);
+    this.w3 = new Web3(provider);
   }
 }

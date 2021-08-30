@@ -215,23 +215,28 @@ var Web3Market = /** @class */ (function (_super) {
         var _this = _super.call(this, config) || this;
         var BASE_DERIVATION_PATH = "44'/60'/0'/0";
         var mnemonicWalletSubprovider = new subproviders_1.MnemonicWalletSubprovider({
-            mnemonic: "MNEMONIC",
+            mnemonic: config.Mnemonic,
             baseDerivationPath: BASE_DERIVATION_PATH,
         });
-        var API_KEY = process.env.API_KEY || "";
         var infuraRpcSubprovider = new subproviders_1.RPCSubprovider(_this.network);
         var providerEngine = new subproviders_1.Web3ProviderEngine();
-        _this.provider = providerEngine;
         providerEngine.addProvider(mnemonicWalletSubprovider);
         providerEngine.addProvider(infuraRpcSubprovider);
+        providerEngine.addProvider(new web3_1.default.providers.HttpProvider(_this.network));
         providerEngine.start();
-        _this.seaport = new opensea_js_1.OpenSeaPort(providerEngine, {
-            networkName: config.NetworkName === "mainnet" || config.NetworkName === "live"
-                ? opensea_js_1.Network.Main
-                : opensea_js_1.Network.Rinkeby,
-            apiKey: API_KEY,
-        }, function (arg) { return console.log(arg); });
-        _this.w3 = new web3_1.default(_this.provider);
+        //
+        // this.seaport = new OpenSeaPort(
+        //   providerEngine,
+        //   {
+        //     networkName:
+        //       config.NetworkName === "mainnet" || config.NetworkName === "live"
+        //         ? Network.Main
+        //         : Network.Rinkeby,
+        //     apiKey: config.OpenSeaAPIKey,
+        //   },
+        //   (arg) => console.log(arg)
+        // );
+        _this.w3 = new web3_1.default(new web3_1.default.providers.HttpProvider(_this.network));
         return _this;
     }
     return Web3Market;
@@ -241,11 +246,11 @@ var HTTPMarket = /** @class */ (function (_super) {
     __extends(HTTPMarket, _super);
     function HTTPMarket(config) {
         var _this = _super.call(this, config) || this;
-        _this.provider = new web3_1.default.providers.HttpProvider(_this.network);
-        _this.seaport = new opensea_js_1.OpenSeaPort(_this.provider, {
+        var provider = new web3_1.default.providers.HttpProvider(_this.network);
+        _this.seaport = new opensea_js_1.OpenSeaPort(provider, {
             networkName: opensea_js_1.Network.Main,
         });
-        _this.w3 = new web3_1.default(_this.provider);
+        _this.w3 = new web3_1.default(provider);
         return _this;
     }
     return HTTPMarket;
